@@ -1,9 +1,6 @@
 import random
 from packet import Packet 
 
-import random
-from packet import Packet 
-
 def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="periodic", threshold=100, aggregation_interval=5):
     last_sent_time = 0  # Track last sent time for periodic transmission
     last_sent_data = None  # Track the last data value for threshold-based transmission
@@ -42,6 +39,7 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
                 # Send aggregated data as one big packet
                 aggregated_size = sum(pkt.size for pkt in accumulated_data)
                 aggregated_packet = Packet(aggregated_size, src_node.name, dest_node.name)
+                aggregated_packet.creation_time = env.now  # 🛠️ FIX: Set creation_time
                 env.process(src_node.send_packet(aggregated_packet, next_hop=dest_node, tracker=tracker))
                 accumulated_data = []
                 aggregation_timer = 0
