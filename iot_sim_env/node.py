@@ -12,7 +12,7 @@ class Node:
         self.links[other_node] = link
 
     def send_packet(self, packet, next_hop, tracker=None):
-        print(f"{self.name} sending packet to {next_hop.name} at {self.env.now}")
+        # print(f"{self.name} sending packet to {next_hop.name} at {self.env.now}")
         link = self.links[next_hop]
         
         # If this is the final destination, record the packet completion

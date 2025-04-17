@@ -1,7 +1,7 @@
 import random
 from packet import Packet 
 
-def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="periodic", threshold=100, aggregation_interval=5):
+def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="periodic", threshold=100, aggregation_interval=5, lambda_val=1):
     last_sent_time = 0  # Track last sent time for periodic transmission
     last_sent_data = None  # Track the last data value for threshold-based transmission
     accumulated_data = []  # List to accumulate data for temporal aggregation
@@ -18,31 +18,29 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
 
         packet = Packet(packet_size, src_node.name, dest_node.name)
         packet.creation_time = env.now
+        tracker.record_generated()
+        
+        # send packet with different strategies
         
         if strategy == "periodic":
-            # Periodic transmission: Send packet at regular intervals
             env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
             yield env.timeout(random.expovariate(1))
             
         elif strategy == "threshold":
-            # Threshold-based transmission: Send packet if data changes significantly
             if last_sent_data is None or abs(packet.size - last_sent_data) > threshold:
                 env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
                 last_sent_data = packet.size
 
         elif strategy == "temporal_aggregation":
-            # Temporal aggregation: Accumulate data and send after a fixed interval
             accumulated_data.append(packet)
             aggregation_timer += 1
 
             if aggregation_timer >= aggregation_interval:
-                # Send aggregated data as one big packet
                 aggregated_size = sum(pkt.size for pkt in accumulated_data)
                 aggregated_packet = Packet(aggregated_size, src_node.name, dest_node.name)
-                aggregated_packet.creation_time = env.now  # 🛠️ FIX: Set creation_time
+                aggregated_packet.creation_time = env.now  
                 env.process(src_node.send_packet(aggregated_packet, next_hop=dest_node, tracker=tracker))
                 accumulated_data = []
                 aggregation_timer = 0
         
-        # Wait until the next event
-        yield env.timeout(random.expovariate(1))
+        yield env.timeout(random.expovariate(lambda_val))

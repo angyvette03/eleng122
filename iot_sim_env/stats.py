@@ -5,14 +5,19 @@ class PacketTracker:
         self.packets = []
         self.transit_times = []
         self.packet_sizes = []
-        self.distances = {}  # Map of (src, dest) -> distance
+        self.distances = {}  
         self.size_distribution = {
             "small": 0,     # Packets < 100 bytes
             "medium": 0,    # Packets 100-500 bytes
             "large": 0      # Packets > 500 bytes
         }
+        self.generated_count = 0
+
+    def record_generated(self):
+        self.generated_count += 1
         
     def record_packet(self, packet, transit_time):
+        # self.sent_count += 1
         self.packets.append(packet)
         self.transit_times.append(transit_time)
         self.packet_sizes.append(packet.size)
@@ -51,8 +56,10 @@ class PacketTracker:
         }
     
     def get_statistics(self):
+
         return {
-            "total_packets": len(self.packets),
+            "total_packets_sent": len(self.packets),
+            "total_packets_generated": self.generated_count,
             "total_bytes": sum(self.packet_sizes),
             "avg_packet_size": statistics.mean(self.packet_sizes) if self.packet_sizes else 0,
             "avg_transit_time": statistics.mean(self.transit_times) if self.transit_times else 0,
