@@ -31,6 +31,7 @@ def run_simulation(strategy, tracker, lambda_val):
     return final_stats, size_stats
 
 def main():
+    results = []
     strategies = ['periodic', 'threshold', 'temporal_aggregation']
     lambdas = [0.1, 1, 10]
     
@@ -54,11 +55,22 @@ def main():
             print(f"Average transit time: {final_stats['avg_transit_time']:.6f} seconds")
             print(f"Network throughput: {final_stats['packets_per_second']:.2f} packets/second")
             
-            print(f"\nSize distribution:")
-            print(f"  Small (<100B): {size_stats['size_distribution']['small']}")
-            print(f"  Medium (100-500B): {size_stats['size_distribution']['medium']}")
-            print(f"  Large (>500B): {size_stats['size_distribution']['large']}")
-            print(f"  Size Percentiles: {size_stats['size_percentiles']}")
+            # print(f"\nSize distribution:")
+            # print(f"  Small (<100B): {size_stats['size_distribution']['small']}")
+            # print(f"  Medium (100-500B): {size_stats['size_distribution']['medium']}")
+            # print(f"  Large (>500B): {size_stats['size_distribution']['large']}")
+            # print(f"  Size Percentiles: {size_stats['size_percentiles']}")
+            results.append({
+            "strategy": strategy,
+            "lambda": lambda_value,
+            "sent": final_stats["total_packets_sent"],
+            "generated": final_stats["total_packets_generated"],
+            "bytes": final_stats["total_bytes"],
+            "avg_size": final_stats["avg_packet_size"],
+            "throughput": final_stats["packets_per_second"],
+            "avg_delay": final_stats["avg_transit_time"]
+        })
+            # print(results)
 
 if __name__ == "__main__":
     main()
