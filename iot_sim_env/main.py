@@ -2,6 +2,8 @@ import simpy
 from node import Node
 from routing import traffic_generator
 from stats import PacketTracker
+import pandas as pd
+import os
 
 def run_simulation(strategy, tracker, lambda_val):
     env = simpy.Environment()
@@ -60,17 +62,22 @@ def main():
             # print(f"  Medium (100-500B): {size_stats['size_distribution']['medium']}")
             # print(f"  Large (>500B): {size_stats['size_distribution']['large']}")
             # print(f"  Size Percentiles: {size_stats['size_percentiles']}")
+            
             results.append({
-            "strategy": strategy,
-            "lambda": lambda_value,
-            "sent": final_stats["total_packets_sent"],
-            "generated": final_stats["total_packets_generated"],
-            "bytes": final_stats["total_bytes"],
-            "avg_size": final_stats["avg_packet_size"],
-            "throughput": final_stats["packets_per_second"],
-            "avg_delay": final_stats["avg_transit_time"]
-        })
+                "strategy": strategy,
+                "lambda": lambda_value,
+                "total_packets_sent": final_stats["total_packets_sent"],
+                "total_packets_generated": final_stats["total_packets_generated"],
+                "total_bytes": final_stats["total_bytes"],
+                "avg_packet_size": final_stats["avg_packet_size"],
+                "packets_per_second": final_stats["packets_per_second"],
+                "avg_transit_time": final_stats["avg_transit_time"]
+            })
             # print(results)
+    
+    # Save results to CSV
+    df = pd.DataFrame(results)
+    df.to_csv("results.csv", index=False)
 
 if __name__ == "__main__":
     main()
