@@ -5,7 +5,7 @@ from stats import PacketTracker
 import pandas as pd
 import os
 
-def run_simulation(strategy, tracker, lambda_val):
+def run_simulation(strategy, tracker, lambda_val, threshold_pct=0.5, aggregation_interval=5):
     env = simpy.Environment()
 
     # Create nodes
@@ -19,9 +19,13 @@ def run_simulation(strategy, tracker, lambda_val):
     node_B.add_link(node_C, bandwidth=1_000_000)  # 1 Mbps
 
     # Start traffic generation for each strategy
-    env.process(traffic_generator(env, node_A, node_B, size_choice=0, tracker=tracker, strategy=strategy, aggregation_interval=5, lambda_val=lambda_val))
-    # env.process(traffic_generator(env, node_B, node_C, size_choice=1, tracker=tracker, strategy=strategy, threshold=100, aggregation_interval=5))
-    # env.process(traffic_generator(env, node_B, node_C, size_choice=2, tracker=tracker, strategy=strategy, threshold=100, aggregation_interval=5))
+    env.process(traffic_generator(
+        env, node_A, node_B, size_choice=0, tracker=tracker,
+        strategy=strategy,
+        threshold_pct=threshold_pct,
+        aggregation_interval=aggregation_interval,
+        lambda_val=lambda_val
+    ))
 
     # Run the simulation, 10 is the duration in seconds of simulated activity
     env.run(until=100)
@@ -35,12 +39,15 @@ def run_simulation(strategy, tracker, lambda_val):
 def main():
     results = []
     strategies = ['periodic', 'threshold', 'temporal_aggregation']
+    
     def frange(start, stop, step):
         while start <= stop:
             yield round(start, 2)
             start += step
 
     lambdas = list(frange(0.1, 10.0, 0.1))
+    threshold_pct = 0.5 
+    aggregation_interval = 5
 
     for strategy in strategies:
         for lambda_value in lambdas:
@@ -50,7 +57,13 @@ def main():
             tracker = PacketTracker()
             
             # Run the simulation for the current strategy
-            final_stats, size_stats = run_simulation(strategy, tracker, lambda_value)
+            final_stats, size_stats = run_simulation(
+                strategy,
+                tracker,
+                lambda_value,
+                threshold_pct=threshold_pct,
+                aggregation_interval=aggregation_interval
+            )
             
             # Print the results
             print("\n=== FINAL NETWORK STATISTICS ===")

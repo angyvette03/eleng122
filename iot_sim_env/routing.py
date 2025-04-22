@@ -1,7 +1,7 @@
 import random
 from packet import Packet
 
-def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="periodic", aggregation_interval=5, lambda_val=1):
+def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="periodic", threshold_pct=0.5, aggregation_interval=5, lambda_val=1):
     last_sent_time = 0  # Track last sent time for periodic transmission
     accumulated_data = []  # List to accumulate data for temporal aggregation
     aggregation_timer = 0  # Timer for temporal aggregation
@@ -33,8 +33,7 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
             avg_size = sum(history) / len(history)
             change = abs(packet.size - avg_size) / avg_size if avg_size > 0 else 1
 
-            # if the packet size differs by more than 20% from the moving average
-            if change > 0.5:
+            if change > threshold_pct:
                 env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
 
         elif strategy == "temporal_aggregation":
