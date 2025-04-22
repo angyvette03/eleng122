@@ -34,7 +34,7 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
             change = abs(packet.size - avg_size) / avg_size if avg_size > 0 else 1
 
             # if the packet size differs by more than 20% from the moving average
-            if change > 0.2:
+            if change > 0.5:
                 env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
 
         elif strategy == "temporal_aggregation":
