@@ -23,7 +23,7 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
         # Send packet with different strategies
         if strategy == "periodic":
             env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
-            yield env.timeout(random.expovariate(1))
+            yield env.timeout(random.expovariate(lambda_val))
 
         elif strategy == "threshold":
             history.append(packet.size)
