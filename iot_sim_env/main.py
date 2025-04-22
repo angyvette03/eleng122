@@ -19,7 +19,7 @@ def run_simulation(strategy, tracker, lambda_val):
     node_B.add_link(node_C, bandwidth=1_000_000)  # 1 Mbps
 
     # Start traffic generation for each strategy
-    env.process(traffic_generator(env, node_A, node_B, size_choice=0, tracker=tracker, strategy=strategy, threshold=100, aggregation_interval=5, lambda_val=lambda_val))
+    env.process(traffic_generator(env, node_A, node_B, size_choice=0, tracker=tracker, strategy=strategy, aggregation_interval=5, lambda_val=lambda_val))
     # env.process(traffic_generator(env, node_B, node_C, size_choice=1, tracker=tracker, strategy=strategy, threshold=100, aggregation_interval=5))
     # env.process(traffic_generator(env, node_B, node_C, size_choice=2, tracker=tracker, strategy=strategy, threshold=100, aggregation_interval=5))
 

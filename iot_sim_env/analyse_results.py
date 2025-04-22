@@ -14,10 +14,10 @@ print("Best overall energy consumption strategy:")
 print(best_energy[['strategy', 'lambda', 'energy']])
 
 def categorize_strategy(row):
-    if row['lambda'] < 1:
-        return 'Low Data Rate (Environment Monitoring)'
-    elif row['lambda'] >= 1 and row['lambda'] < 10:
-        return 'Moderate Data (Smart Agriculture)'
+    if row['lambda'] <= 1.0:
+        return 'Low Data Rate (Environmental Monitoring)'
+    elif row['lambda'] <= 5.0:
+        return 'Moderate Data Rate (Smart Agriculture)'
     else:
         return 'High Data Rate (Healthcare)'
 
@@ -44,7 +44,7 @@ for strategy in strategies:
         poly = np.poly1d(coeffs)
         x_fit = np.linspace(min(x), max(x), 200)
         y_fit = poly(x_fit)
-        plt.plot(x_fit, y_fit, label=f'{strategy} (best fit)')
+        plt.plot(x_fit, y_fit, label=f'{strategy}')
 
 plt.xlabel('Lambda (Packets per second)')
 plt.ylabel('Energy Consumption (mJ)')
