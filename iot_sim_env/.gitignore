@@ -3,3 +3,5 @@ iot_sim_env/
 *.pyc
 __pycache__/
 pyvenv.cfg
+*.csv
+*.png

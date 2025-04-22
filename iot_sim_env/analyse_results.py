@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 df = pd.read_csv('results.csv')
 
@@ -31,8 +32,19 @@ plt.figure(figsize=(10, 6))
 
 strategies = df['strategy'].unique()
 for strategy in strategies:
-    subset = df[df['strategy'] == strategy]
-    plt.plot(subset['lambda'], subset['energy'], label=f'{strategy} strategy')
+    subset = df[df['strategy'] == strategy].sort_values(by='lambda')
+    x = subset['lambda'].values
+    y = subset['energy'].values
+
+    plt.scatter(x, y, s=5, label="_nolegend_")
+
+    if len(x) >= 3:
+        degree = 2
+        coeffs = np.polyfit(x, y, degree)
+        poly = np.poly1d(coeffs)
+        x_fit = np.linspace(min(x), max(x), 200)
+        y_fit = poly(x_fit)
+        plt.plot(x_fit, y_fit, label=f'{strategy} (best fit)')
 
 plt.xlabel('Lambda (Packets per second)')
 plt.ylabel('Energy Consumption (mJ)')
@@ -43,5 +55,4 @@ plt.grid(True)
 plt.savefig('energy_vs_lambda.png')
 
 energy_comparison = df.groupby(['strategy', 'lambda'])['energy'].min().reset_index()
-print("\nEnergy consumption comparison by strategy:")
-print(energy_comparison)
+energy_comparison.to_csv('energy_consumption.csv', index=False)

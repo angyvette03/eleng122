@@ -35,8 +35,13 @@ def run_simulation(strategy, tracker, lambda_val):
 def main():
     results = []
     strategies = ['periodic', 'threshold', 'temporal_aggregation']
-    lambdas = [0.1, 1, 10]
-    
+    def frange(start, stop, step):
+        while start <= stop:
+            yield round(start, 2)
+            start += step
+
+    lambdas = list(frange(0.1, 10.0, 0.1))
+
     for strategy in strategies:
         for lambda_value in lambdas:
             print(f"\n=== Running Simulation with {strategy.capitalize()} Transmission and Frequency = {lambda_value} ===")
