@@ -5,7 +5,13 @@ from stats import PacketTracker
 import pandas as pd
 import os
 
-def run_simulation(strategy, tracker, lambda_val, threshold_pct=0.5, aggregation_interval=5):
+def compute_strategy_params(strategy, lambda_val):
+    # Logic matches routing.py
+    threshold_pct = min(0.5, max(0.1, lambda_val / 10))
+    aggregation_interval = max(1, int(lambda_val * 2))
+    return threshold_pct, aggregation_interval
+
+def run_simulation(strategy, tracker, lambda_val):
     env = simpy.Environment()
 
     # Create nodes
@@ -22,8 +28,6 @@ def run_simulation(strategy, tracker, lambda_val, threshold_pct=0.5, aggregation
     env.process(traffic_generator(
         env, node_A, node_B, size_choice=0, tracker=tracker,
         strategy=strategy,
-        threshold_pct=threshold_pct,
-        aggregation_interval=aggregation_interval,
         lambda_val=lambda_val
     ))
 
@@ -46,8 +50,6 @@ def main():
             start += step
 
     lambdas = list(frange(0.1, 10.0, 0.1))
-    threshold_pct = 0.5 
-    aggregation_interval = 5
 
     for strategy in strategies:
         for lambda_value in lambdas:
@@ -55,14 +57,15 @@ def main():
             
             # Initialize the packet tracker for each run
             tracker = PacketTracker()
+
+            # Compute parameters for logging
+            threshold_pct, aggregation_interval = compute_strategy_params(strategy, lambda_value)
             
             # Run the simulation for the current strategy
             final_stats, size_stats = run_simulation(
                 strategy,
                 tracker,
-                lambda_value,
-                threshold_pct=threshold_pct,
-                aggregation_interval=aggregation_interval
+                lambda_value
             )
             
             # Print the results
@@ -89,7 +92,10 @@ def main():
                 "total_bytes": final_stats["total_bytes"],
                 "avg_packet_size": final_stats["avg_packet_size"],
                 "packets_per_second": final_stats["packets_per_second"],
-                "avg_transit_time": final_stats["avg_transit_time"]
+                "avg_transit_time": final_stats["avg_transit_time"],
+                "periodic_interval": round(1 / lambda_value, 4) if strategy == "periodic" else "",
+                "threshold_pct": threshold_pct if strategy == "threshold" else "",
+                "aggregation_interval": aggregation_interval if strategy == "temporal_aggregation" else ""
             })
             # print(results)
     

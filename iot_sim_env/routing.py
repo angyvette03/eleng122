@@ -7,6 +7,9 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
     aggregation_timer = 0  # Timer for temporal aggregation
     history = []
 
+    threshold_pct = min(0.5, max(0.1, lambda_val / 10))
+    aggregation_interval = max(1, int(lambda_val * 2)) 
+
     while True:
         # Generate packet with appropriate size
         if size_choice == 0:  
@@ -22,8 +25,9 @@ def traffic_generator(env, src_node, dest_node, size_choice, tracker, strategy="
 
         # Send packet with different strategies
         if strategy == "periodic":
+            periodic_interval = 1 / lambda_val
             env.process(src_node.send_packet(packet, next_hop=dest_node, tracker=tracker))
-            yield env.timeout(random.expovariate(lambda_val))
+            yield env.timeout(periodic_interval)
 
         elif strategy == "threshold":
             history.append(packet.size)
